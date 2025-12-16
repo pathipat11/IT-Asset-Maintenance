@@ -1,43 +1,84 @@
 {% extends "core/base.html" %}
 {% block title %}Low Stock{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Low Stock Alert</h3>
-    <a class="btn btn-outline-dark" href="{% url 'core:part_list' %}">Back to Parts</a>
+
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <h3 class="m-0 fw-bold">Low Stock Alert</h3>
+            <div class="text-muted small mt-1">
+                Parts with balance ≤ threshold will appear here.
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <a class="btn btn-outline-secondary" href="{% url 'core:part_list' %}">← Back to Parts</a>
+        </div>
+    </div>
 </div>
 
-<div class="alert alert-warning">
-    Parts with balance ≤ threshold
+<div class="card mb-3">
+    <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="text-muted">
+            <span class="fw-semibold">Rule:</span> balance ≤ threshold
+        </div>
+        <div class="badge-soft">
+            Total: {{ parts|length }} item{{ parts|length|pluralize }}
+        </div>
+    </div>
 </div>
 
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>SKU</th>
-            <th>Name</th>
-            <th>Vendor</th>
-            <th>Balance</th>
-            <th>Threshold</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for p in parts %}
-        <tr>
-            <td><a href="{% url 'core:part_detail' p.id %}">{{ p.sku }}</a></td>
-            <td>{{ p.name }}</td>
-            <td>{{ p.vendor|default:"-" }}</td>
-            <td><span class="badge bg-warning text-dark">{{ p.balance }}</span></td>
-            <td>{{ p.low_stock_threshold }}</td>
-            <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'core:part_update' p.id %}">Edit</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6" class="text-muted">No low stock parts 🎉</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Low Stock Items</span>
+        <a class="btn btn-sm btn-primary" href="{% url 'core:part_create' %}">+ New Part</a>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-clean align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Name</th>
+                        <th>Vendor</th>
+                        <th>Balance</th>
+                        <th>Threshold</th>
+                        <th class="text-end"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in parts %}
+                    <tr>
+                        <td class="fw-semibold">
+                            <a href="{% url 'core:part_detail' p.id %}">{{ p.sku }}</a>
+                        </td>
+                        <td>{{ p.name }}</td>
+                        <td class="text-muted">{{ p.vendor|default:"-" }}</td>
+
+                        <td>
+                            <span class="badge-status overdue">
+                                {{ p.balance }}
+                            </span>
+                        </td>
+
+                        <td class="text-muted">{{ p.low_stock_threshold }}</td>
+
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'core:part_update' p.id %}">Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-muted py-4">
+                            No low stock parts 🎉
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

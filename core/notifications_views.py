@@ -10,7 +10,12 @@ class NotificationListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Notification.objects.filter(recipient=self.request.user)
+        return (
+            Notification.objects
+            .filter(recipient_id=self.request.user.id)
+            .order_by("-created_at")
+        )
+
 
 class NotificationMarkReadView(LoginRequiredMixin, View):
     def post(self, request, pk):

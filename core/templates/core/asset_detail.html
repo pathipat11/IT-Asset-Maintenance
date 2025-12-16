@@ -1,85 +1,223 @@
 {% extends "core/base.html" %}
+{% block title %}Asset {{ asset.asset_code }}{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Asset: {{ asset.asset_code }}</h3>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-primary" href="{% url 'core:asset_update' asset.id %}">Edit</a>
-        <a class="btn btn-outline-danger" href="{% url 'core:asset_delete' asset.id %}">Delete</a>
+
+<!-- Header -->
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <h3 class="m-0 fw-bold">
+                    Asset: <span class="mono">{{ asset.asset_code }}</span>
+                </h3>
+
+                {% if asset.status == "IN_USE" %}
+                <span class="badge-status new">{{ asset.get_status_display }}</span>
+                {% elif asset.status == "IN_STOCK" %}
+                <span class="badge-status assigned">{{ asset.get_status_display }}</span>
+                {% elif asset.status == "REPAIR" %}
+                <span class="badge-status progress">{{ asset.get_status_display }}</span>
+                {% elif asset.status == "RETIRED" %}
+                <span class="badge-status closed">{{ asset.get_status_display }}</span>
+                {% elif asset.status == "LOST" %}
+                <span class="badge-status overdue">{{ asset.get_status_display }}</span>
+                {% else %}
+                <span class="badge-status">{{ asset.get_status_display }}</span>
+                {% endif %}
+            </div>
+
+            <div class="text-muted small mt-1">
+                {{ asset.category }} • Updated: {{ asset.updated_at|date:"Y-m-d H:i" }}
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <a class="btn btn-outline-secondary" href="{% url 'core:asset_list' %}">← Back</a>
+            <a class="btn btn-outline-primary" href="{% url 'core:asset_update' asset.id %}">Edit</a>
+            <a class="btn btn-outline-danger" href="{% url 'core:asset_delete' asset.id %}">Delete</a>
+        </div>
     </div>
 </div>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <div><b>Category:</b> {{ asset.category }}</div>
-        <div><b>Status:</b> {{ asset.get_status_display }}</div>
-        <div><b>Serial:</b> {{ asset.serial_number|default:"-" }}</div>
-        <div><b>Owner:</b> {{ asset.owner|default:"-" }}</div>
-        <div><b>Department:</b> {{ asset.department|default:"-" }}</div>
-        <div><b>Location:</b> {{ asset.location|default:"-" }}</div>
-        <div class="mt-2"><b>Note:</b><br>{{ asset.note|linebreaksbr|default:"-" }}</div>
-    </div>
-</div>
+<div class="row g-3">
+    <!-- Left: Asset info -->
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header">Asset Info</div>
+            <div class="card-body card-pad">
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Tickets</span>
-        <a class="btn btn-sm btn-primary" href="{% url 'core:ticket_create' %}">New Ticket</a>
-    </div>
-    <div class="card-body">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Subject</th>
-                    <th>Status</th>
-                    <th>Priority</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in asset.tickets.all %}
-                <tr>
-                    <td><a href="{% url 'core:ticket_detail' t.id %}">{{ t.ticket_no }}</a></td>
-                    <td>{{ t.subject }}</td>
-                    <td>{{ t.get_status_display }}</td>
-                    <td>{{ t.get_priority_display }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-muted">No tickets</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+                <div class="meta-row">
+                    <div class="meta-item">
+                        <div class="kv">
+                            <div class="k">Category</div>
+                            <div class="v">{{ asset.category }}</div>
+                        </div>
+                    </div>
 
-<div class="card mt-3">
-    <div class="card-header">Assignment History</div>
-    <div class="card-body">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Changed by</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for x in assign_logs %}
-                <tr>
-                    <td>{{ x.changed_at|date:"Y-m-d H:i" }}</td>
-                    <td>{{ x.old_owner|default:"-" }}</td>
-                    <td>{{ x.new_owner|default:"-" }}</td>
-                    <td>{{ x.changed_by|default:"-" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-muted">No assignment changes</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    <div class="meta-item">
+                        <div class="kv">
+                            <div class="k">Serial</div>
+                            <div class="v mono">{{ asset.serial_number|default:"-" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <div class="kv">
+                            <div class="k">Owner</div>
+                            <div class="v">{{ asset.owner|default:"-" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <div class="kv">
+                            <div class="k">Department</div>
+                            <div class="v">{{ asset.department|default:"-" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <div class="kv">
+                            <div class="k">Location</div>
+                            <div class="v">{{ asset.location|default:"-" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <div class="kv">
+                            <div class="k">Warranty End</div>
+                            <div class="v">{{ asset.warranty_end|date:"Y-m-d"|default:"-" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="hr-soft">
+
+                <div class="section-title mb-1">Note</div>
+                <div class="text-muted">
+                    {{ asset.note|linebreaksbr|default:"-" }}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Tickets + Assignment history -->
+    <div class="col-lg-7">
+
+        <!-- Tickets -->
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Tickets</span>
+                <a class="btn btn-sm btn-primary" href="{% url 'core:ticket_create' %}">+ New Ticket</a>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-clean mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">No</th>
+                                <th>Subject</th>
+                                <th style="width: 18%">Status</th>
+                                <th style="width: 18%">Priority</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for t in asset.tickets.all %}
+                            <tr>
+                                <td>
+                                    <a class="fw-semibold" href="{% url 'core:ticket_detail' t.id %}">
+                                        {{ t.ticket_no }}
+                                    </a>
+                                </td>
+                                <td class="text-muted">{{ t.subject }}</td>
+
+                                <td>
+                                    {% if t.status == "NEW" %}
+                                    <span class="badge-status new">New</span>
+                                    {% elif t.status == "ASSIGNED" %}
+                                    <span class="badge-status assigned">Assigned</span>
+                                    {% elif t.status == "IN_PROGRESS" %}
+                                    <span class="badge-status progress">In Progress</span>
+                                    {% elif t.status == "DONE" %}
+                                    <span class="badge-status done">Done</span>
+                                    {% elif t.status == "CLOSED" %}
+                                    <span class="badge-status closed">Closed</span>
+                                    {% else %}
+                                    <span class="badge-status">{{ t.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if t.priority == "LOW" %}
+                                    <span class="badge-priority low">Low</span>
+                                    {% elif t.priority == "MEDIUM" %}
+                                    <span class="badge-priority medium">Medium</span>
+                                    {% elif t.priority == "HIGH" %}
+                                    <span class="badge-priority high">High</span>
+                                    {% elif t.priority == "URGENT" %}
+                                    <span class="badge-priority urgent">Urgent</span>
+                                    {% else %}
+                                    <span class="badge-priority">{{ t.get_priority_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-muted">No tickets</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment History -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Assignment History</span>
+                <span class="badge badge-soft">{{ assign_logs|length }}</span>
+            </div>
+
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover table-clean mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 26%">Time</th>
+                                <th style="width: 22%">From</th>
+                                <th style="width: 22%">To</th>
+                                <th style="width: 30%">Changed by</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for x in assign_logs %}
+                            <tr>
+                                <td class="text-muted">{{ x.changed_at|date:"Y-m-d H:i" }}</td>
+                                <td class="text-muted">{{ x.old_owner|default:"-" }}</td>
+                                <td class="fw-semibold">{{ x.new_owner|default:"-" }}</td>
+                                <td class="text-muted">{{ x.changed_by|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-muted">No assignment changes</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="form-text mt-2">
+                    * ระบบบันทึกประวัติการเปลี่ยน Owner เพื่อการ Audit ในบริษัท
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 

@@ -18,6 +18,22 @@ class AssetForm(forms.ModelForm):
             "note": forms.Textarea(attrs={"rows": 3}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+            # textarea
+            if isinstance(field.widget, forms.Textarea):
+                field.widget.attrs["class"] = "form-control"
+            # selects
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs["class"] = "form-select"
+            # inputs (text/number/date)
+            else:
+                existing = field.widget.attrs.get("class", "")
+                field.widget.attrs["class"] = (existing + " form-control").strip()
+    
+
 
 class TicketForm(forms.ModelForm):
     """
@@ -64,7 +80,8 @@ class TicketForm(forms.ModelForm):
                 existing = field.widget.attrs.get("class", "")
                 field.widget.attrs["class"] = (existing + " form-control").strip()
             if isinstance(field.widget, forms.Select):
-                field.widget.attrs["class"] = "form-select"
+                field.widget.attrs["class"] = (field.widget.attrs.get("class","") + " form-select").strip()
+
 
 
 class TicketAttachmentForm(forms.ModelForm):
@@ -90,7 +107,8 @@ class PartForm(forms.ModelForm):
             if isinstance(field.widget, (forms.TextInput, forms.NumberInput, forms.Select)):
                 field.widget.attrs["class"] = "form-control"
             if isinstance(field.widget, forms.Select):
-                field.widget.attrs["class"] = "form-select"
+                field.widget.attrs["class"] = (field.widget.attrs.get("class","") + " form-select").strip()
+
 
 
 class StockMovementForm(forms.ModelForm):

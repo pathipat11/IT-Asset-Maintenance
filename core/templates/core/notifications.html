@@ -1,48 +1,100 @@
 {% extends "core/base.html" %}
 {% block title %}Notifications{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Notifications</h3>
-    <form method="post" action="{% url 'core:notification_read_all' %}">
-        {% csrf_token %}
-        <button class="btn btn-outline-secondary btn-sm">Mark all read</button>
-    </form>
+
+<!-- Header -->
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <h3 class="m-0 fw-bold">Notifications</h3>
+            <div class="text-muted small mt-1">
+                Updates from tickets, low stock alerts, and system activities.
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <form method="post" action="{% url 'core:notification_read_all' %}" class="m-0">
+                {% csrf_token %}
+                <button class="btn btn-outline-secondary">Mark all read</button>
+            </form>
+        </div>
+    </div>
 </div>
 
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>Time</th>
-            <th>Title</th>
-            <th>Type</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for n in items %}
-        <tr class="{% if not n.is_read %}table-warning{% endif %}">
-            <td>{{ n.created_at|date:"Y-m-d H:i" }}</td>
-            <td>
-                {% if n.url %}<a href="{{ n.url }}">{{ n.title }}</a>{% else %}{{ n.title }}{% endif %}
-                <div class="text-muted small">{{ n.message }}</div>
-            </td>
-            <td>{{ n.ntype }}</td>
-            <td class="text-end">
-                {% if not n.is_read %}
-                <form method="post" action="{% url 'core:notification_read' n.id %}">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-primary">Mark read</button>
-                </form>
-                {% endif %}
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4" class="text-muted">No notifications</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- List -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent</span>
+        <span class="badge-soft">Sorted by newest</span>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-clean mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 170px;">Time</th>
+                        <th>Title</th>
+                        <th style="width: 170px;">Type</th>
+                        <th style="width: 160px;"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for n in items %}
+                    <tr>
+                        <td class="text-muted">{{ n.created_at|date:"Y-m-d H:i" }}</td>
+
+                        <td>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                {% if not n.is_read %}
+                                <span class="badge-status overdue">UNREAD</span>
+                                {% else %}
+                                <span class="badge-status">READ</span>
+                                {% endif %}
+
+                                <div class="fw-semibold">
+                                    {% if n.url %}
+                                    <a href="{{ n.url }}" class="{% if not n.is_read %}fw-bold{% endif %}">{{ n.title }}</a>
+                                    {% else %}
+                                    {{ n.title }}
+                                    {% endif %}
+
+                                </div>
+                            </div>
+
+                            {% if n.message %}
+                            <div class="text-muted small mt-1">{{ n.message }}</div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="badge-soft">{{ n.get_ntype_display|default:n.ntype }}</span>
+                        </td>
+
+                        <td class="text-end">
+                            {% if not n.is_read %}
+                            <form method="post" action="{% url 'core:notification_read' n.id %}" class="m-0">
+                                {% csrf_token %}
+                                <button class="btn btn-sm btn-outline-primary">Mark read</button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-muted">No notifications</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
 
 {% include "core/partials/pagination.html" %}
 {% endblock %}

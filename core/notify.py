@@ -15,3 +15,7 @@ def notify_users(users, ntype, title, message="", url=""):
 def notify_it(ntype, title, message="", url=""):
     users = users_in_groups(["ADMIN", "IT"])
     notify_users(users, ntype, title, message, url)
+
+def notify_requester(ticket, ntype, title, message="", url=""):
+    if ticket.requested_by and ticket.requested_by.is_active:
+        notify_users([ticket.requested_by], ntype, title, message, url)

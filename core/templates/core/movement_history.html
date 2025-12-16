@@ -1,75 +1,147 @@
 {% extends "core/base.html" %}
 {% block title %}Movements{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Movement History</h3>
-    <div class="d-flex gap-2">
-        <a class="btn btn-outline-primary" href="{% url 'core:export_movements_csv' %}">Export Movements CSV</a>
+
+<!-- Header -->
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <h3 class="m-0 fw-bold">Movement History</h3>
+            <div class="text-muted small mt-1">
+                Track stock in/out with filters and export for audit/report.
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <a class="btn btn-outline-primary" href="{% url 'core:export_movements_csv' %}">
+                Export CSV
+            </a>
+        </div>
     </div>
 </div>
 
-<form class="card card-body mb-3">
-    <div class="row g-2">
-        <div class="col-md-4">
-            <input class="form-control" name="q" placeholder="Search (sku/name/ticket/note)"
-                value="{{ request.GET.q }}">
-        </div>
-        <div class="col-md-2">
-            <select class="form-select" name="type">
-                <option value="">All Types</option>
-                <option value="IN" {% if request.GET.type == "IN" %}selected{% endif %}>IN</option>
-                <option value="OUT" {% if request.GET.type == "OUT" %}selected{% endif %}>OUT</option>
-            </select>
-        </div>
-        <div class="col-md-2">
-            <input class="form-control" name="part" placeholder="Part sku/name" value="{{ request.GET.part }}">
-        </div>
-        <div class="col-md-2">
-            <input class="form-control" name="ticket" placeholder="Ticket no" value="{{ request.GET.ticket }}">
-        </div>
-        <div class="col-md-1">
-            <input class="form-control" type="date" name="from" value="{{ request.GET.from }}">
-        </div>
-        <div class="col-md-1">
-            <input class="form-control" type="date" name="to" value="{{ request.GET.to }}">
-        </div>
-        <div class="col-12 d-grid">
-            <button class="btn btn-outline-secondary">Apply Filters</button>
+<!-- Filters -->
+<form class="filter-card mb-3">
+    <div class="card-body card-pad">
+        <div class="row g-2">
+
+            <div class="col-12 col-lg-4">
+                <label class="form-label fw-semibold">Search</label>
+                <input class="form-control" name="q" placeholder="sku / name / ticket / note"
+                    value="{{ request.GET.q }}">
+            </div>
+
+            <div class="col-12 col-lg-2">
+                <label class="form-label fw-semibold">Type</label>
+                <select class="form-select" name="type">
+                    <option value="">All</option>
+                    <option value="IN" {% if request.GET.type == "IN" %}selected{% endif %}>IN</option>
+                    <option value="OUT" {% if request.GET.type == "OUT" %}selected{% endif %}>OUT</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-lg-3">
+                <label class="form-label fw-semibold">Part</label>
+                <input class="form-control" name="part" placeholder="sku or name" value="{{ request.GET.part }}">
+            </div>
+
+            <div class="col-12 col-lg-3">
+                <label class="form-label fw-semibold">Ticket</label>
+                <input class="form-control" name="ticket" placeholder="ticket no" value="{{ request.GET.ticket }}">
+            </div>
+
+            <div class="col-12 col-lg-2">
+                <label class="form-label fw-semibold">From</label>
+                <input class="form-control" type="date" name="from" value="{{ request.GET.from }}">
+            </div>
+
+            <div class="col-12 col-lg-2">
+                <label class="form-label fw-semibold">To</label>
+                <input class="form-control" type="date" name="to" value="{{ request.GET.to }}">
+            </div>
+
+            <div class="col-12 col-lg-8 d-flex align-items-end gap-2">
+                <button class="btn btn-primary px-4">Apply</button>
+                <a class="btn btn-outline-secondary" href="{% url 'core:movement_history' %}">Reset</a>
+            </div>
+
         </div>
     </div>
 </form>
 
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>Time</th>
-            <th>Part</th>
-            <th>Type</th>
-            <th>Qty</th>
-            <th>Ticket</th>
-            <th>By</th>
-            <th>Note</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for m in movements %}
-        <tr>
-            <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
-            <td><a href="{% url 'core:part_detail' m.part.id %}">{{ m.part.sku }}</a></td>
-            <td>{{ m.movement_type }}</td>
-            <td>{{ m.qty }}</td>
-            <td>{% if m.ref_ticket %}<a href="{% url 'core:ticket_detail' m.ref_ticket.id %}">{{ m.ref_ticket.ticket_no
-                    }}</a>{% else %}-{% endif %}</td>
-            <td>{{ m.created_by|default:"-" }}</td>
-            <td>{{ m.note|default:"" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="7" class="text-muted">No movements</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Results</span>
+        <span class="badge-soft">
+            {{ page_obj.paginator.count|default:0 }} records
+        </span>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-clean mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 160px;">Time</th>
+                        <th>Part</th>
+                        <th style="width: 90px;">Type</th>
+                        <th style="width: 90px;">Qty</th>
+                        <th style="width: 160px;">Ticket</th>
+                        <th style="width: 140px;">By</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for m in movements %}
+                    <tr>
+                        <td class="text-muted">{{ m.created_at|date:"Y-m-d H:i" }}</td>
+
+                        <td>
+                            <div class="fw-semibold">
+                                <a href="{% url 'core:part_detail' m.part.id %}">{{ m.part.sku }}</a>
+                            </div>
+                            <div class="text-muted small">{{ m.part.name }}</div>
+                        </td>
+
+                        <td>
+                            {% if m.movement_type == "IN" %}
+                            <span class="badge-status assigned">IN</span>
+                            {% else %}
+                            <span class="badge-status overdue">OUT</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="fw-bold">{{ m.qty }}</td>
+
+                        <td>
+                            {% if m.ref_ticket %}
+                            <a href="{% url 'core:ticket_detail' m.ref_ticket.id %}">
+                                {{ m.ref_ticket.ticket_no }}
+                            </a>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-muted">{{ m.created_by|default:"-" }}</td>
+
+                        <td class="text-muted">
+                            {{ m.note|default:"" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-muted">No movements</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+</div>
 
 {% include "core/partials/pagination.html" %}
 {% endblock %}

@@ -2,69 +2,107 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h3 class="mb-3">Dashboard</h3>
-<div class="d-flex gap-2 mb-3">
-  <a class="btn btn-outline-primary" href="{% url 'core:export_assets_csv' %}">Export Assets CSV</a>
-  <a class="btn btn-outline-primary" href="{% url 'core:export_tickets_csv' %}">Export Tickets CSV</a>
+
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <h3 class="m-0 fw-bold">Dashboard</h3>
+            <div class="text-muted small mt-1">
+                Overview of tickets, assets, and cost.
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <a class="btn btn-outline-primary" href="{% url 'core:export_assets_csv' %}">Export Assets CSV</a>
+            <a class="btn btn-outline-primary" href="{% url 'core:export_tickets_csv' %}">Export Tickets CSV</a>
+        </div>
+    </div>
 </div>
+
 <div class="row g-3 mb-3">
     <div class="col-md-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="text-muted">Open Tickets</div>
-                <div class="fs-4">{{ open_tickets }}</div>
+        <div class="card kpi kpi-open">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="kpi-label">Open Tickets</div>
+                    <div class="kpi-value">{{ open_tickets }}</div>
+                </div>
+                <div class="kpi-icon">📌</div>
             </div>
         </div>
     </div>
+
     <div class="col-md-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="text-muted">Overdue</div>
-                <div class="fs-4">{{ overdue_tickets }}</div>
+        <div class="card kpi kpi-overdue">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="kpi-label">Overdue</div>
+                    <div class="kpi-value">{{ overdue_tickets }}</div>
+                </div>
+                <div class="kpi-icon">⏰</div>
             </div>
         </div>
     </div>
+
     <div class="col-md-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="text-muted">Assets</div>
-                <div class="fs-4">{{ assets_total }}</div>
+        <div class="card kpi">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="kpi-label">Assets</div>
+                    <div class="kpi-value">{{ assets_total }}</div>
+                </div>
+                <div class="kpi-icon">💻</div>
             </div>
         </div>
     </div>
+
     <div class="col-md-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="text-muted">Total Cost</div>
-                <div class="fs-4">{{ cost_month }}</div>
+        <div class="card kpi">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="kpi-label">Total Cost</div>
+                    <div class="kpi-value">{{ cost_month }}</div>
+                </div>
+                <div class="kpi-icon">💸</div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="card">
-    <div class="card-header">Top Assets with Tickets</div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Top Assets with Tickets</span>
+        <span class="badge-soft">Top 5</span>
+    </div>
+
     <div class="card-body">
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Asset</th>
-                    <th>Tickets</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for a in top_assets %}
-                <tr>
-                    <td><a href="{% url 'core:asset_detail' a.id %}">{{ a.asset_code }}</a></td>
-                    <td>{{ a.ticket_count }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2" class="text-muted">No data</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-hover table-clean align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Asset</th>
+                        <th>Tickets</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in top_assets %}
+                    <tr>
+                        <td class="fw-semibold">
+                            <a href="{% url 'core:asset_detail' a.id %}">{{ a.asset_code }}</a>
+                        </td>
+                        <td>
+                            <span class="badge-status">{{ a.ticket_count }}</span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-muted py-4">No data</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
 {% endblock %}

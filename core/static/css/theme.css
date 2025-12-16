@@ -1,0 +1,758 @@
+/* ===== THEME TOKENS (CSS Variables) ===== */
+:root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface-2: #f0f1f3;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+
+    --nav-bg: #7a0f1a;
+    /* blood red */
+    --nav-text: #ffffff;
+
+    --primary: #7a0f1a;
+    /* match nav in light */
+    --primary-hover: #641016;
+
+    --link: #7a0f1a;
+    --shadow: 0 12px 30px rgba(17, 24, 39, 0.08);
+    --radius: 14px;
+}
+
+/* Dark (blue, not black) */
+html[data-theme="dark"] {
+    --bg: #0b1b2b;
+    /* deep navy */
+    --surface: #0f253a;
+    /* card surface */
+    --surface-2: #12314c;
+    --text: #e8eef6;
+    --muted: #9fb0c3;
+    --border: rgba(255, 255, 255, 0.10);
+
+    --nav-bg: #0a3a63;
+    /* nice blue */
+    --nav-text: #e8eef6;
+
+    --primary: #2d7dd2;
+    /* blue accent */
+    --primary-hover: #2568ad;
+
+    --link: #8dc2ff;
+    --shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* ===== BASE ===== */
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Navbar */
+.navbar {
+    background: var(--nav-bg) !important;
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link,
+.navbar .text-white {
+    color: var(--nav-text) !important;
+}
+
+.navbar .nav-link {
+    opacity: 0.92;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+    opacity: 1;
+}
+
+/* Layout */
+.container {
+    max-width: 1180px;
+}
+
+/* Cards */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.card-header {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Tables */
+.table {
+    color: var(--text);
+}
+
+.table thead th {
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom-color: var(--border);
+}
+
+.table td,
+.table th {
+    border-color: var(--border);
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(125, 140, 160, 0.08);
+}
+
+/* List group */
+.list-group-item {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+/* Forms */
+.form-control,
+.form-select,
+textarea {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+    border-radius: 12px;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 .2rem rgba(45, 125, 210, 0.20);
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Links */
+a {
+    color: var(--link);
+}
+
+a:hover {
+    opacity: 0.9;
+}
+
+/* Alerts (subtle) */
+.alert {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+/* Badge */
+.badge.bg-danger {
+    background: #dc2626 !important;
+}
+
+/* ===== COMPONENTS (Modern UI) ===== */
+.page-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.0));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 18px;
+    box-shadow: var(--shadow);
+}
+
+html[data-theme="dark"] .page-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.00));
+}
+
+.kpi {
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi .kpi-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.kpi .kpi-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.kpi .kpi-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: 18px;
+}
+
+.kpi:before {
+    content: "";
+    position: absolute;
+    right: -50px;
+    top: -50px;
+    width: 140px;
+    height: 140px;
+    border-radius: 999px;
+    opacity: 0.18;
+    background: var(--primary);
+}
+
+.kpi-open:before {
+    background: #2d7dd2;
+}
+
+.kpi-overdue:before {
+    background: #dc2626;
+}
+
+.kpi-done:before {
+    background: #16a34a;
+}
+
+.kpi-closed:before {
+    background: #6b7280;
+}
+
+.table-clean thead th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.table-clean tbody td {
+    vertical-align: middle;
+}
+
+.badge-soft {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* ===== Ticket List UI ===== */
+.pillbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pill {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="dark"] .pill {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.pill:hover {
+    opacity: 0.95;
+}
+
+.pill.active {
+    border-color: var(--primary);
+    outline: 2px solid rgba(45, 125, 210, 0.18);
+}
+
+.badge-status {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.badge-status.new {
+    background: rgba(45, 125, 210, 0.12);
+}
+
+.badge-status.assigned {
+    background: rgba(147, 197, 253, 0.14);
+}
+
+.badge-status.progress {
+    background: rgba(245, 158, 11, 0.16);
+}
+
+.badge-status.done {
+    background: rgba(34, 197, 94, 0.14);
+}
+
+.badge-status.closed {
+    background: rgba(156, 163, 175, 0.18);
+}
+
+.badge-status.overdue {
+    background: rgba(220, 38, 38, 0.16);
+    border-color: rgba(220, 38, 38, 0.35);
+}
+
+.badge-priority {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.badge-priority.low {
+    background: rgba(156, 163, 175, 0.18);
+}
+
+.badge-priority.medium {
+    background: rgba(45, 125, 210, 0.12);
+}
+
+.badge-priority.high {
+    background: rgba(245, 158, 11, 0.16);
+}
+
+.badge-priority.urgent {
+    background: rgba(220, 38, 38, 0.16);
+    border-color: rgba(220, 38, 38, 0.35);
+}
+
+.filter-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+/* ===== Ticket Detail UI ===== */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.toolbar .btn {
+    border-radius: 999px;
+}
+
+.section-title {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .meta-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.meta-item {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 12px 12px;
+}
+
+.kv {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.kv .k {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.kv .v {
+    font-weight: 700;
+}
+
+.hr-soft {
+    height: 1px;
+    background: var(--border);
+    border: 0;
+    margin: 12px 0;
+}
+
+.card-pad {
+    padding: 14px;
+}
+
+.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.badge-overdue {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 800;
+    background: rgba(220, 38, 38, 0.16);
+    border: 1px solid rgba(220, 38, 38, 0.35);
+}
+
+.badge-due {
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-weight: 800;
+    background: rgba(45, 125, 210, 0.12);
+    border: 1px solid var(--border);
+}
+
+/* Navbar polish */
+.navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+}
+
+html[data-theme="dark"] .navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Make nav links feel premium */
+.navbar .nav-link {
+    border-radius: 999px;
+    padding: 8px 12px !important;
+    margin-right: 6px;
+}
+
+.navbar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.10);
+}
+
+/* ================================
+   BOOTSTRAP OVERRIDES (MUST BE LAST)
+   Fix: dark mode text, table, muted, borders
+================================== */
+
+/* Ensure whole page uses tokens */
+html,
+body {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+}
+
+/* Bootstrap text helpers override */
+.text-muted,
+.small.text-muted,
+.form-text,
+.table td .text-muted,
+.table td small.text-muted {
+    color: var(--muted) !important;
+}
+
+.text-secondary {
+    color: var(--muted) !important;
+}
+
+/* Cards & containers should inherit text */
+.card,
+.card-body,
+.card-header,
+.page-header {
+    color: var(--text) !important;
+}
+
+/* Make ALL table variants follow theme */
+.table {
+    --bs-table-color: var(--text);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--border);
+    --bs-table-striped-color: var(--text);
+    --bs-table-striped-bg: rgba(125, 140, 160, 0.06);
+    --bs-table-active-color: var(--text);
+    --bs-table-active-bg: rgba(125, 140, 160, 0.10);
+    --bs-table-hover-color: var(--text);
+    --bs-table-hover-bg: rgba(125, 140, 160, 0.08);
+    color: var(--text) !important;
+}
+
+.table thead th {
+    color: var(--muted) !important;
+    border-bottom-color: var(--border) !important;
+}
+
+.table td,
+.table th {
+    border-color: var(--border) !important;
+}
+
+/* Table row highlight that doesn't break in dark */
+.table-hover tbody tr:hover>* {
+    color: var(--text) !important;
+    background: rgba(125, 140, 160, 0.10) !important;
+}
+
+/* List group */
+.list-group-item {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+
+/* Forms: placeholders + disabled + file input */
+.form-control,
+.form-select,
+textarea {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+.form-control::placeholder,
+textarea::placeholder {
+    color: color-mix(in srgb, var(--muted) 85%, transparent) !important;
+    opacity: 1 !important;
+}
+
+.form-control:disabled,
+.form-select:disabled,
+textarea:disabled {
+    background: var(--surface-2) !important;
+    color: var(--muted) !important;
+    opacity: 1 !important;
+}
+
+/* Fix <input type="file"> in dark */
+input[type="file"] {
+    color: var(--text) !important;
+}
+
+input[type="file"]::file-selector-button {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 6px 10px;
+}
+
+/* Bootstrap buttons (outline) should match theme */
+.btn-outline-secondary {
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+.btn-outline-secondary:hover {
+    background: var(--surface-2) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+
+/* Bootstrap "dark" button becomes theme-appropriate */
+.btn-outline-dark {
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+.btn-outline-dark:hover {
+    background: var(--surface-2) !important;
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+}
+
+/* Alerts in dark should not be bright */
+.alert {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* The warning row in notifications (if any) */
+.table-warning {
+    --bs-table-bg: rgba(245, 158, 11, 0.18);
+    --bs-table-color: var(--text);
+}
+
+/* Dropdowns / menus / modals (ถ้ามีใช้ทีหลัง) */
+.dropdown-menu,
+.modal-content {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+/* Make badges readable on dark */
+.badge.bg-warning.text-dark {
+    color: #111827 !important;
+}
+
+/* Links inside tables */
+.table a {
+    color: var(--link) !important;
+}
+
+/* Dropdown theme */
+.dropdown-menu {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.dropdown-item {
+    color: var(--text);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.dropdown-divider {
+    border-top: 1px solid var(--border);
+}
+
+/* ===== Premium Dropdown / Profile Chip ===== */
+.profile-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--nav-text);
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.profile-chip:hover {
+    background: rgba(255, 255, 255, 0.14);
+    transform: translateY(-1px);
+}
+
+.profile-chip:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.25);
+    outline-offset: 2px;
+}
+
+.profile-chip.dropdown-toggle::after {
+    margin-left: 6px;
+    opacity: 0.85;
+}
+
+.avatar-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.profile-name {
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dropdown menu modern */
+.menu-modern.dropdown-menu {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px;
+    min-width: 220px;
+    box-shadow: var(--shadow);
+}
+
+.menu-modern .dropdown-item {
+    border-radius: 12px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.menu-modern .dropdown-item:hover,
+.menu-modern .dropdown-item:focus {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.menu-modern .dropdown-divider {
+    border-top: 1px solid var(--border);
+    margin: 8px 6px;
+}
+
+/* make "Logout" look dangerous but clean */
+.menu-modern .dropdown-item.text-danger:hover {
+    background: rgba(220, 38, 38, 0.12);
+}
+
+/* ===== FIX DROPDOWN GETTING CLIPPED / COVERED ===== */
+
+/* อย่าให้พ่อของ dropdown ตัดเมนูทิ้ง */
+.navbar,
+.navbar .container,
+.navbar .collapse,
+.navbar .navbar-nav,
+.navbar .ms-auto {
+    overflow: visible !important;
+}
+
+/* ยกชั้น navbar และเมนู */
+.navbar {
+    position: sticky;
+    /* หรือ relative ก็ได้ แต่ sticky ช่วยให้ดูโปร */
+    top: 0;
+    z-index: 1030;
+    /* เทียบเท่า bootstrap navbar */
+}
+
+/* ยก dropdown ให้เหนือทุกอย่าง */
+.dropdown-menu {
+    z-index: 2000 !important;
+}
+
+/* ปรับเมนูให้ไม่แนบชนและดูพรีเมียม */
+.menu-modern.dropdown-menu {
+    margin-top: 10px !important;
+    padding: 10px !important;
+}

@@ -1,54 +1,147 @@
 {% extends "core/base.html" %}
 {% block title %}Assets{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Assets</h3>
-    <a class="btn btn-primary" href="{% url 'core:asset_create' %}">New Asset</a>
+
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <h3 class="m-0 fw-bold">Assets</h3>
+            <div class="text-muted small mt-1">
+                Company inventory with status, owner, and last updated time.
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary" href="{% url 'core:asset_create' %}">+ New Asset</a>
+        </div>
+    </div>
 </div>
 
-<form class="row g-2 mb-3">
-    <div class="col-md-6">
-        <input class="form-control" name="q" placeholder="Search asset code / serial" value="{{ request.GET.q }}">
-    </div>
-    <div class="col-md-3">
-        <select class="form-select" name="status">
-            <option value="">All Status</option>
-            {% for k,v in view.model.Status.choices %}
-            <option value="{{ k }}" {% if request.GET.status == k %}selected{% endif %}>{{ v }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-md-3 d-grid">
-        <button class="btn btn-outline-secondary">Filter</button>
-    </div>
-</form>
+<!-- Filters -->
+<div class="filter-card p-3 mb-3">
+    <form class="row g-2 align-items-end">
+        <div class="col-lg-6">
+            <label class="form-label fw-semibold mb-1">Search</label>
+            <input class="form-control" name="q" placeholder="Search asset code / serial" value="{{ request.GET.q }}">
+        </div>
 
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>Asset Code</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Owner</th>
-            <th>Updated</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for a in assets %}
-        <tr>
-            <td><a href="{% url 'core:asset_detail' a.id %}">{{ a.asset_code }}</a></td>
-            <td>{{ a.category }}</td>
-            <td>{{ a.get_status_display }}</td>
-            <td>{{ a.owner|default:"-" }}</td>
-            <td>{{ a.updated_at|date:"Y-m-d H:i" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="text-muted">No assets</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <div class="col-lg-3">
+            <label class="form-label fw-semibold mb-1">Status</label>
+            <select class="form-select" name="status">
+                <option value="">All Status</option>
+                {% for k,v in view.model.Status.choices %}
+                <option value="{{ k }}" {% if request.GET.status == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-{% include "core/partials/pagination.html" %}
+        <div class="col-lg-3 d-grid">
+            <button class="btn btn-outline-secondary">Filter</button>
+        </div>
+
+        <div class="col-12">
+            <div class="pillbar mt-2">
+                <a class="pill {% if not request.GET.status and not request.GET.q %}active{% endif %}"
+                    href="{% url 'core:asset_list' %}">All</a>
+
+                <a class="pill {% if request.GET.status == 'IN_USE' %}active{% endif %}"
+                    href="{% url 'core:asset_list' %}?status=IN_USE">In Use</a>
+
+                <a class="pill {% if request.GET.status == 'IN_STOCK' %}active{% endif %}"
+                    href="{% url 'core:asset_list' %}?status=IN_STOCK">In Stock</a>
+
+                <a class="pill {% if request.GET.status == 'REPAIR' %}active{% endif %}"
+                    href="{% url 'core:asset_list' %}?status=REPAIR">Repair</a>
+
+                <a class="pill {% if request.GET.status == 'RETIRED' %}active{% endif %}"
+                    href="{% url 'core:asset_list' %}?status=RETIRED">Retired</a>
+
+                <a class="pill {% if request.GET.status == 'LOST' %}active{% endif %}"
+                    href="{% url 'core:asset_list' %}?status=LOST">Lost</a>
+            </div>
+
+            {% if request.GET.q %}
+            <div class="text-muted small mt-2">
+                Showing results for: <span class="fw-semibold">{{ request.GET.q }}</span>
+                • <a href="{% url 'core:asset_list' %}">Reset</a>
+            </div>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Asset List</span>
+        <span class="badge badge-soft">Total: {{ page_obj.paginator.count }}</span>
+    </div>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-clean mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 16%">Asset Code</th>
+                        <th style="width: 18%">Category</th>
+                        <th style="width: 18%">Status</th>
+                        <th style="width: 24%">Owner</th>
+                        <th style="width: 24%">Updated</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for a in assets %}
+                    <tr>
+                        <td>
+                            <a class="fw-semibold" href="{% url 'core:asset_detail' a.id %}">
+                                {{ a.asset_code }}
+                            </a>
+                            {% if a.serial_number %}
+                            <div class="text-muted small">SN: {{ a.serial_number }}</div>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-muted">{{ a.category }}</td>
+
+                        <td>
+                            {% if a.status == "IN_USE" %}
+                            <span class="badge-status new">{{ a.get_status_display }}</span>
+                            {% elif a.status == "IN_STOCK" %}
+                            <span class="badge-status assigned">{{ a.get_status_display }}</span>
+                            {% elif a.status == "REPAIR" %}
+                            <span class="badge-status progress">{{ a.get_status_display }}</span>
+                            {% elif a.status == "RETIRED" %}
+                            <span class="badge-status closed">{{ a.get_status_display }}</span>
+                            {% elif a.status == "LOST" %}
+                            <span class="badge-status overdue">{{ a.get_status_display }}</span>
+                            {% else %}
+                            <span class="badge-status">{{ a.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-muted">
+                            {{ a.owner|default:"-" }}
+                            {% if a.department %}
+                            <div class="text-muted small">Dept: {{ a.department }}</div>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-muted">{{ a.updated_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-muted">No assets</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    {% include "core/partials/pagination.html" %}
+</div>
+
 {% endblock %}

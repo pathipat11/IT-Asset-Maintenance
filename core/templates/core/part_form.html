@@ -1,13 +1,73 @@
 {% extends "core/base.html" %}
+{% block title %}{% if object %}Edit Part{% else %}New Part{% endif %}{% endblock %}
 {% block content %}
-<h3 class="mb-3">{% if object %}Edit Part{% else %}New Part{% endif %}</h3>
 
-<form method="post" class="card card-body">
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <h3 class="m-0 fw-bold">
+                {% if object %}Edit Part{% else %}Create New Part{% endif %}
+            </h3>
+            <div class="text-muted small mt-1">
+                Manage part master data (SKU, vendor, unit, cost, low stock threshold).
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <a class="btn btn-outline-secondary" href="{% url 'core:part_list' %}">← Back</a>
+            {% if object %}
+            <a class="btn btn-outline-primary" href="{% url 'core:part_detail' object.id %}">View</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<form method="post" class="card">
     {% csrf_token %}
-    {{ form.as_p }}
-    <div class="d-flex gap-2">
-        <button class="btn btn-primary">Save</button>
-        <a class="btn btn-outline-secondary" href="{% url 'core:part_list' %}">Back</a>
+
+    <div class="card-body card-pad">
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="row g-3">
+            {% for field in form.visible_fields %}
+            <div class="col-12 col-lg-6">
+                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                    <span class="text-danger">*</span>
+                    {% endif %}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+
+                {% if field.errors %}
+                <div class="text-danger small mt-1">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <hr class="hr-soft">
+
+        <div class="d-flex flex-wrap gap-2 justify-content-end">
+            <a class="btn btn-outline-secondary" href="{% url 'core:part_list' %}">Cancel</a>
+            <button class="btn btn-primary px-4">
+                {% if object %}Save Changes{% else %}Create Part{% endif %}
+            </button>
+        </div>
+
     </div>
 </form>
+
 {% endblock %}

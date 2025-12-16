@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.db.models import Count, Sum, Q
 from django.shortcuts import redirect
@@ -9,11 +9,11 @@ from django.views.generic import (
     TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 )
 
-from .permissions import GroupRequiredMixin, is_it, is_manager
+from .permissions import GroupRequiredMixin, is_it, is_manager, can_edit_ticket
 from .forms import AssetForm, TicketForm, TicketAttachmentForm, TicketCommentForm, TicketUsePartForm
 from .models import Asset, Ticket, TicketAttachment, TicketComment, AuditLog, PartStockMovement
 from .sla import get_sla_hours, calc_due_at
-from .notify import notify_it, notify_users
+from .notify import notify_it, notify_users, notify_requester
 from .models import Notification
 
 class HomeRedirectView(View):
@@ -196,6 +196,7 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
             ref_ticket=self.object, movement_type="OUT"
         ).select_related("part", "created_by").order_by("-created_at")[:50]
         ctx["now"] = timezone.now()
+        ctx["can_edit_ticket"] = can_edit_ticket(self.request.user, self.object)
         return ctx
 
     def post(self, request, *args, **kwargs):
@@ -322,11 +323,15 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
 
 
 
-class TicketUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
-    required_groups = ["ADMIN", "IT", "MANAGER"]
+class TicketUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Ticket
     form_class = TicketForm
     template_name = "core/ticket_form.html"
+    raise_exception = True  # ไม่ผ่าน = 403
+
+    def test_func(self):
+        ticket = self.get_object()
+        return can_edit_ticket(self.request.user, ticket)
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
@@ -345,6 +350,14 @@ class TicketUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
             summary=self.object.ticket_no,
             created_by=self.request.user,
         )
+        notify_requester(
+            self.object,
+            Notification.Type.TICKET_UPDATE,
+            title=f"Ticket Updated: {self.object.ticket_no}",
+            message=f"Status: {self.object.status}",
+            url=f"/tickets/{self.object.pk}/",
+        )
+
         messages.success(self.request, "Ticket updated")
         return res
 

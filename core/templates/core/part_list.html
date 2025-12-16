@@ -1,64 +1,99 @@
 {% extends "core/base.html" %}
 {% block title %}Parts{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Parts</h3>
-    <div class="d-flex gap-2">
-        <a class="btn btn-primary" href="{% url 'core:part_create' %}">New Part</a>
-        <a class="btn btn-outline-warning" href="{% url 'core:low_stock' %}">Low Stock</a>
+
+<!-- Header -->
+<div class="page-header mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+            <h3 class="m-0 fw-bold">Parts</h3>
+            <div class="text-muted small mt-1">
+                Manage stock items, vendors, and balances.
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <a class="btn btn-outline-warning" href="{% url 'core:low_stock' %}">Low Stock</a>
+            <a class="btn btn-primary" href="{% url 'core:part_create' %}">New Part</a>
+        </div>
+    </div>
+
+    <div class="pillbar mt-3">
+        <a class="pill" href="{% url 'core:export_parts_csv' %}">Export Parts CSV</a>
+        <a class="pill" href="{% url 'core:export_movements_csv' %}">Export Movements CSV</a>
     </div>
 </div>
 
-<div class="d-flex gap-2 mb-3">
-    <a class="btn btn-outline-primary" href="{% url 'core:export_parts_csv' %}">Export Parts CSV</a>
-    <a class="btn btn-outline-primary" href="{% url 'core:export_movements_csv' %}">Export Movements CSV</a>
+<!-- Filter -->
+<div class="filter-card mb-3 p-3">
+    <form class="row g-2 align-items-end">
+        <div class="col-12 col-md-9">
+            <label class="form-label fw-semibold mb-1">Search</label>
+            <input class="form-control" name="q" placeholder="Search by SKU / name" value="{{ request.GET.q }}">
+        </div>
+
+        <div class="col-12 col-md-3 d-grid">
+            <button class="btn btn-outline-secondary">Search</button>
+        </div>
+    </form>
 </div>
 
-
-<form class="row g-2 mb-3">
-    <div class="col-md-9">
-        <input class="form-control" name="q" placeholder="Search sku / name" value="{{ request.GET.q }}">
+<!-- Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>All Parts</span>
+        <span class="badge-soft">{{ page_obj.paginator.count|default:parts|length }} items</span>
     </div>
-    <div class="col-md-3 d-grid">
-        <button class="btn btn-outline-secondary">Search</button>
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-clean align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Name</th>
+                        <th>Vendor</th>
+                        <th>Balance</th>
+                        <th>Unit</th>
+                        <th class="text-end"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for p in parts %}
+                    <tr>
+                        <td class="fw-semibold">
+                            <a href="{% url 'core:part_detail' p.id %}">{{ p.sku }}</a>
+                        </td>
+
+                        <td>{{ p.name }}</td>
+
+                        <td class="text-muted">{{ p.vendor|default:"-" }}</td>
+
+                        <td>
+                            <span class="fw-semibold">{{ p.stock_balance }}</span>
+
+                            {% if p.stock_balance <= p.low_stock_threshold %} <span class="badge-status overdue ms-2">
+                                LOW</span>
+                                {% endif %}
+                        </td>
+
+                        <td class="text-muted">{{ p.unit }}</td>
+
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'core:part_update' p.id %}">Edit</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-muted">No parts</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</form>
-
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th>SKU</th>
-            <th>Name</th>
-            <th>Vendor</th>
-            <th>Balance</th>
-            <th>Unit</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for p in parts %}
-        <tr>
-            <td><a href="{% url 'core:part_detail' p.id %}">{{ p.sku }}</a></td>
-            <td>{{ p.name }}</td>
-            <td>{{ p.vendor|default:"-" }}</td>
-            <td>
-                {{ p.stock_balance }}
-                {% if p.balance <= p.low_stock_threshold %} <span class="badge bg-warning text-dark">LOW</span>
-                    {% endif %}
-
-            </td>
-            <td>{{ p.unit }}</td>
-            <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'core:part_update' p.id %}">Edit</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="text-muted">No parts</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+</div>
 
 {% include "core/partials/pagination.html" %}
 {% endblock %}
