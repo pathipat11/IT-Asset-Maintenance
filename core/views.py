@@ -13,6 +13,8 @@ from .permissions import GroupRequiredMixin, is_it, is_manager
 from .froms import AssetForm, TicketForm, TicketAttachmentForm, TicketCommentForm, TicketUsePartForm
 from .models import Asset, Ticket, TicketAttachment, TicketComment, AuditLog, PartStockMovement
 from .sla import get_sla_hours, calc_due_at
+from .notify import notify_it, notify_users
+from .models import Notification
 
 class HomeRedirectView(View):
     def get(self, request, *args, **kwargs):
@@ -289,6 +291,12 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
             obj.due_at = calc_due_at(now, obj.sla_hours)
 
         obj.save()
+        notify_it(
+            Notification.Type.TICKET_NEW,
+            title=f"New Ticket: {obj.ticket_no}",
+            message=obj.subject,
+            url=f"/tickets/{obj.pk}/",
+        )
         self.object = obj
 
         AuditLog.objects.create(

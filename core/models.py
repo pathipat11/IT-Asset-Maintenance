@@ -5,6 +5,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
 
 # -----------------------
@@ -300,3 +301,22 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.action} {self.object_type}:{self.object_id}"
+
+class Notification(models.Model):
+    class Type(models.TextChoices):
+        TICKET_NEW = "TICKET_NEW", "New Ticket"
+        TICKET_UPDATE = "TICKET_UPDATE", "Ticket Updated"
+        TICKET_CLOSED = "TICKET_CLOSED", "Ticket Closed"
+        LOW_STOCK = "LOW_STOCK", "Low Stock"
+
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    ntype = models.CharField(max_length=32, choices=Type.choices)
+    title = models.CharField(max_length=200)
+    message = models.TextField(blank=True, default="")
+    url = models.CharField(max_length=300, blank=True, default="")
+    is_read = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">Notifications</h3>
+    <form method="post" action="{% url 'core:notification_read_all' %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-secondary btn-sm">Mark all read</button>
+    </form>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for n in items %}
+        <tr class="{% if not n.is_read %}table-warning{% endif %}">
+            <td>{{ n.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                {% if n.url %}<a href="{{ n.url }}">{{ n.title }}</a>{% else %}{{ n.title }}{% endif %}
+                <div class="text-muted small">{{ n.message }}</div>
+            </td>
+            <td>{{ n.ntype }}</td>
+            <td class="text-end">
+                {% if not n.is_read %}
+                <form method="post" action="{% url 'core:notification_read' n.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-primary">Mark read</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-muted">No notifications</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% include "core/partials/pagination.html" %}
+{% endblock %}

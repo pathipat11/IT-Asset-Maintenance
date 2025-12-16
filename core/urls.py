@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, stock_views, views_my
+from . import views, stock_views, views_my, notifications_views
 from .exports import export_assets_csv, export_tickets_csv, export_parts_csv, export_movements_csv
 
 
@@ -48,4 +48,8 @@ urlpatterns += [
     path("movements/", stock_views.MovementHistoryView.as_view(), name="movement_history"),
     
     path("reports/stock/", stock_views.StockReportView.as_view(), name="stock_report"),
+    
+    path("notifications/", notifications_views.NotificationListView.as_view(), name="notifications"),
+    path("notifications/<int:pk>/read/", notifications_views.NotificationMarkReadView.as_view(), name="notification_read"),
+    path("notifications/read-all/", notifications_views.NotificationMarkAllReadView.as_view(), name="notification_read_all"),
 ]
