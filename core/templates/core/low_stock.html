@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% block title %}Low Stock{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">Low Stock Alert</h3>
+    <a class="btn btn-outline-dark" href="{% url 'core:part_list' %}">Back to Parts</a>
+</div>
+
+<div class="alert alert-warning">
+    Parts with balance ≤ threshold
+</div>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Vendor</th>
+            <th>Balance</th>
+            <th>Threshold</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in parts %}
+        <tr>
+            <td><a href="{% url 'core:part_detail' p.id %}">{{ p.sku }}</a></td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.vendor|default:"-" }}</td>
+            <td><span class="badge bg-warning text-dark">{{ p.stock_balance }}</span></td>
+            <td>{{ p.low_stock_threshold }}</td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'core:part_update' p.id %}">Edit</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-muted">No low stock parts 🎉</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

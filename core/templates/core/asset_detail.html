@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">Asset: {{ asset.asset_code }}</h3>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'core:asset_update' asset.id %}">Edit</a>
+        <a class="btn btn-outline-danger" href="{% url 'core:asset_delete' asset.id %}">Delete</a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div><b>Category:</b> {{ asset.category }}</div>
+        <div><b>Status:</b> {{ asset.get_status_display }}</div>
+        <div><b>Serial:</b> {{ asset.serial_number|default:"-" }}</div>
+        <div><b>Owner:</b> {{ asset.owner|default:"-" }}</div>
+        <div><b>Department:</b> {{ asset.department|default:"-" }}</div>
+        <div><b>Location:</b> {{ asset.location|default:"-" }}</div>
+        <div class="mt-2"><b>Note:</b><br>{{ asset.note|linebreaksbr|default:"-" }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Tickets</span>
+        <a class="btn btn-sm btn-primary" href="{% url 'core:ticket_create' %}">New Ticket</a>
+    </div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in asset.tickets.all %}
+                <tr>
+                    <td><a href="{% url 'core:ticket_detail' t.id %}">{{ t.ticket_no }}</a></td>
+                    <td>{{ t.subject }}</td>
+                    <td>{{ t.get_status_display }}</td>
+                    <td>{{ t.get_priority_display }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-muted">No tickets</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">Part: {{ part.sku }}</h3>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'core:part_update' part.id %}">Edit</a>
+        <a class="btn btn-outline-danger" href="{% url 'core:part_delete' part.id %}">Delete</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted">Balance</div>
+                <div class="fs-3">
+                    {{ balance }}
+                    {% if balance <= part.low_stock_threshold %} <span class="badge bg-warning text-dark">LOW
+                        STOCK</span>
+                        {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted">Total IN</div>
+                <div class="fs-3">{{ in_total }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted">Total OUT</div>
+                <div class="fs-3">{{ out_total }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">Info</div>
+    <div class="card-body">
+        <div><b>Name:</b> {{ part.name }}</div>
+        <div><b>Vendor:</b> {{ part.vendor|default:"-" }}</div>
+        <div><b>Unit:</b> {{ part.unit }}</div>
+        <div><b>Low stock threshold:</b> {{ part.low_stock_threshold }}</div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">Stock In/Out</div>
+    <div class="card-body">
+        {% if can_move_stock %}
+
+        <form method="post" class="row g-2">
+            {% csrf_token %}
+            <div class="col-md-3">{{ movement_form.movement_type }}</div>
+            <div class="col-md-2">{{ movement_form.qty }}</div>
+            <div class="col-md-4">{{ movement_form.ref_ticket }}</div>
+            <div class="col-md-3">{{ movement_form.note }}</div>
+            <div class="col-12 d-grid">
+                <button class="btn btn-primary">Save Movement</button>
+            </div>
+        </form>
+        {% else %}
+        <div class="alert alert-warning">You don't have permission to create stock movements.</div>
+        {% endif %}
+        <div class="form-text">* เฉพาะ IT/Admin จะบันทึก movement ได้</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Recent Movements</div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Qty</th>
+                    <th>Ticket</th>
+                    <th>By</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in movements %}
+                <tr>
+                    <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ m.movement_type }}</td>
+                    <td>{{ m.qty }}</td>
+                    <td>{% if m.ref_ticket %}<a href="{% url 'core:ticket_detail' m.ref_ticket.id %}">{{
+                            m.ref_ticket.ticket_no }}</a>{% else %}-{% endif %}</td>
+                    <td>{{ m.created_by|default:"-" }}</td>
+                    <td>{{ m.note|default:"" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-muted">No movements</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

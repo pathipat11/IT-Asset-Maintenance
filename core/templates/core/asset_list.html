@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}
+{% block title %}Assets{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">Assets</h3>
+    <a class="btn btn-primary" href="{% url 'core:asset_create' %}">New Asset</a>
+</div>
+
+<form class="row g-2 mb-3">
+    <div class="col-md-6">
+        <input class="form-control" name="q" placeholder="Search asset code / serial" value="{{ request.GET.q }}">
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" name="status">
+            <option value="">All Status</option>
+            {% for k,v in view.model.Status.choices %}
+            <option value="{{ k }}" {% if request.GET.status == k %}selected{% endif %}>{{ v }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3 d-grid">
+        <button class="btn btn-outline-secondary">Filter</button>
+    </div>
+</form>
+
+<table class="table table-hover align-middle">
+    <thead>
+        <tr>
+            <th>Asset Code</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Owner</th>
+            <th>Updated</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in assets %}
+        <tr>
+            <td><a href="{% url 'core:asset_detail' a.id %}">{{ a.asset_code }}</a></td>
+            <td>{{ a.category }}</td>
+            <td>{{ a.get_status_display }}</td>
+            <td>{{ a.owner|default:"-" }}</td>
+            <td>{{ a.updated_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-muted">No assets</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% include "core/partials/pagination.html" %}
+{% endblock %}

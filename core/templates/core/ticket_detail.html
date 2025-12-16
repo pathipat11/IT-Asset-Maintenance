@@ -1,0 +1,152 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">Ticket: {{ ticket.ticket_no }}</h3>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-primary" href="{% url 'core:ticket_update' ticket.id %}">Edit</a>
+        <a class="btn btn-outline-danger" href="{% url 'core:ticket_delete' ticket.id %}">Delete</a>
+    </div>
+</div>
+<div class="d-flex gap-2 mb-3">
+    <form method="post" action="{% url 'core:ticket_assign_to_me' ticket.id %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-secondary btn-sm">Assign to me</button>
+    </form>
+
+    <form method="post" action="{% url 'core:ticket_start' ticket.id %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-primary btn-sm">Start</button>
+    </form>
+
+    <form method="post" action="{% url 'core:ticket_resolve' ticket.id %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-success btn-sm">Resolve (DONE)</button>
+    </form>
+
+    <form method="post" action="{% url 'core:ticket_close' ticket.id %}">
+        {% csrf_token %}
+        <button class="btn btn-outline-dark btn-sm">Close</button>
+    </form>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div><b>Asset:</b> <a href="{% url 'core:asset_detail' ticket.asset.id %}">{{ ticket.asset.asset_code }}</a>
+        </div>
+        <div><b>Status:</b> {{ ticket.get_status_display }}</div>
+        <div><b>Priority:</b> {{ ticket.get_priority_display }}</div>
+        <div><b>Assigned:</b> {{ ticket.assigned_to|default:"-" }}</div>
+        <div><b>Due:</b> {{ ticket.due_at|date:"Y-m-d H:i" }}</div>
+        <div class="mt-2"><b>Subject:</b> {{ ticket.subject }}</div>
+        <div class="mt-2"><b>Description:</b><br>{{ ticket.description|linebreaksbr }}</div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Attachments</div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" class="mb-3">
+                    {% csrf_token %}
+                    {{ attach_form.as_p }}
+                    <button class="btn btn-sm btn-primary" name="upload_file">Upload</button>
+                </form>
+
+                <ul class="list-group">
+                    {% for f in ticket.attachments.all %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <a href="{{ f.file.url }}" target="_blank">{{ f.file.name }}</a>
+                        <small class="text-muted">{{ f.uploaded_at|date:"Y-m-d H:i" }}</small>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">No files</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card mt-3">
+            <div class="card-header">Parts Used (Stock OUT)</div>
+            <div class="card-body">
+
+                <form method="post" class="row g-2 mb-3">
+                    {% csrf_token %}
+                    <div class="col-md-5">
+                        <label class="form-label">Part</label>
+                        {{ use_part_form.part }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Qty</label>
+                        {{ use_part_form.qty }}
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Note</label>
+                        {{ use_part_form.note }}
+                    </div>
+                    <div class="col-12 d-grid">
+                        <button class="btn btn-primary" name="use_part">Use Part</button>
+                    </div>
+                    <div class="form-text">* เฉพาะ IT/Admin เท่านั้นที่เบิกอะไหล่ได้ และระบบกันเบิกติดลบ</div>
+                </form>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Part</th>
+                            <th>Qty</th>
+                            <th>By</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in used_parts %}
+                        <tr>
+                            <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+                            <td><a href="{% url 'core:part_detail' m.part.id %}">{{ m.part.sku }}</a> - {{ m.part.name
+                                }}</td>
+                            <td>{{ m.qty }}</td>
+                            <td>{{ m.created_by|default:"-" }}</td>
+                            <td>{{ m.note|default:"" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-muted">No parts used</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Comments</div>
+            <div class="card-body">
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                    <button class="btn btn-sm btn-primary" name="add_comment">Add Comment</button>
+                </form>
+
+                <ul class="list-group">
+                    {% for c in ticket.comments.all %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <b>{{ c.created_by|default:"-" }}</b>
+                            <small class="text-muted">{{ c.created_at|date:"Y-m-d H:i" }}</small>
+                        </div>
+                        <div>{{ c.message|linebreaksbr }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">No comments</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

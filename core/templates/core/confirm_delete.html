@@ -1,0 +1,12 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="card card-body">
+    <h4 class="mb-3">Confirm Delete</h4>
+    <p>Are you sure you want to delete <b>{{ object }}</b> ?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger">Yes, delete</button>
+        <a class="btn btn-outline-secondary" href="javascript:history.back()">Cancel</a>
+    </form>
+</div>
+{% endblock %}
