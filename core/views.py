@@ -12,6 +12,7 @@ from django.views.generic import (
 from .permissions import GroupRequiredMixin, is_it, is_manager
 from .froms import AssetForm, TicketForm, TicketAttachmentForm, TicketCommentForm, TicketUsePartForm
 from .models import Asset, Ticket, TicketAttachment, TicketComment, AuditLog, PartStockMovement
+from .sla import get_sla_hours, calc_due_at
 
 class HomeRedirectView(View):
     def get(self, request, *args, **kwargs):
@@ -121,6 +122,11 @@ class TicketListView(LoginRequiredMixin, ListView):
     context_object_name = "tickets"
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["now"] = timezone.now()
+        return ctx
+    
     def get_queryset(self):
         # ✅ สร้าง qs ตั้งแต่แรกเสมอ
         qs = (
@@ -176,6 +182,7 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
         ctx["used_parts"] = PartStockMovement.objects.filter(
             ref_ticket=self.object, movement_type="OUT"
         ).select_related("part", "created_by").order_by("-created_at")[:50]
+        ctx["now"] = timezone.now()
         return ctx
 
     def post(self, request, *args, **kwargs):
@@ -273,6 +280,13 @@ class TicketCreateView(LoginRequiredMixin, CreateView):
         obj.requested_by = self.request.user
 
         obj.status = Ticket.Status.NEW
+
+        now = timezone.now()
+        sla = getattr(obj, "sla_hours", None)
+        if not sla:
+            obj.sla_hours = get_sla_hours(obj.priority)
+        if not obj.due_at:
+            obj.due_at = calc_due_at(now, obj.sla_hours)
 
         obj.save()
         self.object = obj

@@ -14,6 +14,7 @@
         <div class="container">
             <a class="navbar-brand" href="{% url 'core:home' %}">IT AMS</a>
             <div class="navbar-nav">
+                <a class="nav-link" href="{% url 'core:my_dashboard' %}">My Queue</a>
                 <a class="nav-link" href="{% url 'core:ticket_list' %}">Tickets</a>
 
                 {% if can_admin_area %}
@@ -23,6 +24,7 @@
                 <a class="nav-link" href="{% url 'core:movement_history' %}">Movements</a>
                 <a class="nav-link" href="{% url 'core:stock_report' %}">Stock Report</a>
                 {% endif %}
+
             </div>
 
             <div class="ms-auto d-flex align-items-center gap-2 text-white">

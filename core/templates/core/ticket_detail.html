@@ -1,7 +1,17 @@
 {% extends "core/base.html" %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="m-0">Ticket: {{ ticket.ticket_no }}</h3>
+    <h3 class="m-0">Ticket: {{ ticket.ticket_no }}
+        {% if ticket.due_at %}
+        <div class="mb-2 fs-6 text-secondary">
+            <b>Due:</b> {{ ticket.due_at|date:"Y-m-d H:i" }}
+            {% if ticket.due_at < now and ticket.status != "DONE" and ticket.status != "CLOSED" %} <span
+                class="badge bg-danger">OVERDUE</span>
+                {% endif %}
+        </div>
+        {% endif %}
+    </h3>
+
     <div class="d-flex gap-2">
         <a class="btn btn-outline-primary" href="{% url 'core:ticket_update' ticket.id %}">Edit</a>
         <a class="btn btn-outline-danger" href="{% url 'core:ticket_delete' ticket.id %}">Delete</a>

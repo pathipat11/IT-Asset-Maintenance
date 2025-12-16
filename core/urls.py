@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, stock_views
+from . import views, stock_views, views_my
 from .exports import export_assets_csv, export_tickets_csv, export_parts_csv, export_movements_csv
 
 
@@ -31,6 +31,8 @@ urlpatterns = [
 ]
 
 urlpatterns += [
+    path("my/", views_my.MyDashboardView.as_view(), name="my_dashboard"),
+    
     path("tickets/<int:pk>/assign-to-me/", views.TicketAssignToMeView.as_view(), name="ticket_assign_to_me"),
     path("tickets/<int:pk>/start/", views.TicketStartView.as_view(), name="ticket_start"),
     path("tickets/<int:pk>/resolve/", views.TicketResolveView.as_view(), name="ticket_resolve"),

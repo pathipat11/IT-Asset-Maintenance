@@ -50,9 +50,16 @@
             <td>{{ t.get_status_display }}</td>
             <td>{{ t.get_priority_display }}</td>
             <td>
+                {% if t.due_at %}
                 {{ t.due_at|date:"Y-m-d H:i" }}
-                {% if t.is_overdue %}<span class="badge bg-danger">Overdue</span>{% endif %}
+                {% if t.due_at < now and t.status != "DONE" and t.status != "CLOSED" %} <span class="badge bg-danger">
+                    OVERDUE</span>
+                    {% endif %}
+                    {% else %}
+                    -
+                    {% endif %}
             </td>
+
         </tr>
         {% empty %}
         <tr>
