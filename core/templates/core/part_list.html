@@ -3,8 +3,10 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="m-0">Parts</h3>
-    <a class="btn btn-primary" href="{% url 'core:part_create' %}">New Part</a>
-    <a class="btn btn-outline-warning" href="{% url 'core:low_stock' %}">Low Stock</a>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="{% url 'core:part_create' %}">New Part</a>
+        <a class="btn btn-outline-warning" href="{% url 'core:low_stock' %}">Low Stock</a>
+    </div>
 </div>
 
 <div class="d-flex gap-2 mb-3">
@@ -41,8 +43,9 @@
             <td>{{ p.vendor|default:"-" }}</td>
             <td>
                 {{ p.stock_balance }}
-                {% if p.stock_balance <= p.low_stock_threshold %} <span class="badge bg-warning text-dark">LOW</span>
+                {% if p.balance <= p.low_stock_threshold %} <span class="badge bg-warning text-dark">LOW</span>
                     {% endif %}
+
             </td>
             <td>{{ p.unit }}</td>
             <td class="text-end">

@@ -27,7 +27,7 @@
             <td><a href="{% url 'core:part_detail' p.id %}">{{ p.sku }}</a></td>
             <td>{{ p.name }}</td>
             <td>{{ p.vendor|default:"-" }}</td>
-            <td><span class="badge bg-warning text-dark">{{ p.stock_balance }}</span></td>
+            <td><span class="badge bg-warning text-dark">{{ p.balance }}</span></td>
             <td>{{ p.low_stock_threshold }}</td>
             <td class="text-end">
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'core:part_update' p.id %}">Edit</a>

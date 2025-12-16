@@ -6,7 +6,8 @@ from .exports import export_assets_csv, export_tickets_csv, export_parts_csv, ex
 app_name = "core"
 
 urlpatterns = [
-    path("", views.DashboardView.as_view(), name="dashboard"),
+    path("", views.HomeRedirectView.as_view(), name="home"),
+    path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
 
     # Asset
     path("assets/", views.AssetListView.as_view(), name="asset_list"),
@@ -41,4 +42,8 @@ urlpatterns += [
     path("parts/<int:pk>/edit/", stock_views.PartUpdateView.as_view(), name="part_update"),
     path("parts/<int:pk>/delete/", stock_views.PartDeleteView.as_view(), name="part_delete"),
     path("parts/low-stock/", stock_views.LowStockListView.as_view(), name="low_stock"),
+
+    path("movements/", stock_views.MovementHistoryView.as_view(), name="movement_history"),
+    
+    path("reports/stock/", stock_views.StockReportView.as_view(), name="stock_report"),
 ]

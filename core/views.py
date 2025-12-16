@@ -4,6 +4,7 @@ from django.db.models import Count, Sum, Q
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
+from django.views import View
 from django.views.generic import (
     TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 )
@@ -12,6 +13,13 @@ from .permissions import GroupRequiredMixin, is_it, is_manager
 from .froms import AssetForm, TicketForm, TicketAttachmentForm, TicketCommentForm, TicketUsePartForm
 from .models import Asset, Ticket, TicketAttachment, TicketComment, AuditLog, PartStockMovement
 
+class HomeRedirectView(View):
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("login")
+        if request.user.is_superuser or is_it(request.user) or is_manager(request.user):
+            return redirect("core:dashboard")
+        return redirect("core:ticket_list")
 
 class DashboardView(LoginRequiredMixin, GroupRequiredMixin, TemplateView):
     template_name = "core/dashboard.html"
@@ -114,31 +122,44 @@ class TicketListView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        mine = self.request.GET.get("mine", "").strip()
-        if mine == "1":
-            qs = qs.filter(assigned_to=self.request.user)
+        # ✅ สร้าง qs ตั้งแต่แรกเสมอ
+        qs = (
+            Ticket.objects
+            .select_related("asset", "assigned_to", "requested_by", "vendor")
+            .all()
+            .order_by("-created_at")
+        )
 
-        overdue = self.request.GET.get("overdue", "").strip()
+        u = self.request.user
+
+        # employee เห็นเฉพาะของตัวเอง (กันข้อมูลรั่ว)
+        if not (is_it(u) or is_manager(u) or u.is_superuser):
+            qs = qs.filter(requested_by=u)
+
+        # filters
+        q = (self.request.GET.get("q") or "").strip()
+        status = (self.request.GET.get("status") or "").strip()
+        mine = (self.request.GET.get("mine") or "").strip()
+        overdue = (self.request.GET.get("overdue") or "").strip()
+
+        if q:
+            qs = qs.filter(
+                Q(ticket_no__icontains=q)
+                | Q(subject__icontains=q)
+                | Q(asset__asset_code__icontains=q)
+            )
+
+        if status:
+            qs = qs.filter(status=status)
+
+        # mine=1 => งานที่ assign ให้ฉัน (เฉพาะ IT/Manager/Admin เท่านั้นถึงจะ meaningful)
+        if mine == "1":
+            qs = qs.filter(assigned_to=u)
+
         if overdue == "1":
             now = timezone.now()
             qs = qs.filter(status__in=["NEW", "ASSIGNED", "IN_PROGRESS"], due_at__lt=now)
 
-        qs = super().get_queryset().select_related("asset", "assigned_to", "requested_by", "vendor")
-
-        u = self.request.user
-        if not (is_it(u) or is_manager(u)):
-            qs = qs.filter(requested_by=u)
-
-        q = self.request.GET.get("q", "").strip()
-        status = self.request.GET.get("status", "").strip()
-        if q:
-            qs = qs.filter(
-                Q(ticket_no__icontains=q) |
-                Q(subject__icontains=q) |
-                Q(asset__asset_code__icontains=q)
-            )
-        if status:
-            qs = qs.filter(status=status)
         return qs
 
 
