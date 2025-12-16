@@ -320,3 +320,14 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        
+class AssetAssignmentLog(models.Model):
+    asset = models.ForeignKey("Asset", on_delete=models.CASCADE, related_name="assign_logs")
+    old_owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    new_owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    changed_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    note = models.CharField(max_length=255, blank=True, default="")
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-changed_at"]

@@ -10,7 +10,7 @@ from django.views.generic import (
 )
 
 from .permissions import GroupRequiredMixin, is_it, is_manager
-from .froms import AssetForm, TicketForm, TicketAttachmentForm, TicketCommentForm, TicketUsePartForm
+from .forms import AssetForm, TicketForm, TicketAttachmentForm, TicketCommentForm, TicketUsePartForm
 from .models import Asset, Ticket, TicketAttachment, TicketComment, AuditLog, PartStockMovement
 from .sla import get_sla_hours, calc_due_at
 from .notify import notify_it, notify_users
@@ -70,6 +70,14 @@ class AssetDetailView(LoginRequiredMixin, DetailView):
     template_name = "core/asset_detail.html"
     context_object_name = "asset"
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["assign_logs"] = self.object.assign_logs.select_related(
+            "old_owner", "new_owner", "changed_by"
+        )[:20]
+        return ctx
+
+
 
 class AssetCreateView(LoginRequiredMixin, GroupRequiredMixin, CreateView):
     model = Asset
@@ -98,7 +106,12 @@ class AssetUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
         return reverse_lazy("core:asset_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
-        res = super().form_valid(form)
+        obj = form.save(commit=False)
+        obj._changed_by = self.request.user
+        obj.save()
+        form.save_m2m()
+        self.object = obj
+
         AuditLog.objects.create(
             action="UPDATE_ASSET",
             object_type="Asset",
@@ -106,14 +119,15 @@ class AssetUpdateView(LoginRequiredMixin, GroupRequiredMixin, UpdateView):
             summary=f"{self.object.asset_code}",
             created_by=self.request.user,
         )
-        return res
+        return redirect("core:asset_detail", pk=self.object.pk)
+
 
 
 class AssetDeleteView(LoginRequiredMixin, GroupRequiredMixin, DeleteView):
+    required_groups = ["ADMIN", "IT"]
     model = Asset
     template_name = "core/confirm_delete.html"
     success_url = reverse_lazy("core:asset_list")
-
 
 # -----------------------
 # Ticket CRUD
@@ -130,7 +144,6 @@ class TicketListView(LoginRequiredMixin, ListView):
         return ctx
     
     def get_queryset(self):
-        # ✅ สร้าง qs ตั้งแต่แรกเสมอ
         qs = (
             Ticket.objects
             .select_related("asset", "assigned_to", "requested_by", "vendor")
@@ -140,11 +153,9 @@ class TicketListView(LoginRequiredMixin, ListView):
 
         u = self.request.user
 
-        # employee เห็นเฉพาะของตัวเอง (กันข้อมูลรั่ว)
         if not (is_it(u) or is_manager(u) or u.is_superuser):
             qs = qs.filter(requested_by=u)
 
-        # filters
         q = (self.request.GET.get("q") or "").strip()
         status = (self.request.GET.get("status") or "").strip()
         mine = (self.request.GET.get("mine") or "").strip()
@@ -160,7 +171,6 @@ class TicketListView(LoginRequiredMixin, ListView):
         if status:
             qs = qs.filter(status=status)
 
-        # mine=1 => งานที่ assign ให้ฉัน (เฉพาะ IT/Manager/Admin เท่านั้นถึงจะ meaningful)
         if mine == "1":
             qs = qs.filter(assigned_to=u)
 
@@ -169,6 +179,7 @@ class TicketListView(LoginRequiredMixin, ListView):
             qs = qs.filter(status__in=["NEW", "ASSIGNED", "IN_PROGRESS"], due_at__lt=now)
 
         return qs
+    
 
 
 class TicketDetailView(LoginRequiredMixin, DetailView):

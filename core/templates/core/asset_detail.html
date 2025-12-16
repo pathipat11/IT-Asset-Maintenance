@@ -52,4 +52,35 @@
         </table>
     </div>
 </div>
+
+<div class="card mt-3">
+    <div class="card-header">Assignment History</div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Changed by</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for x in assign_logs %}
+                <tr>
+                    <td>{{ x.changed_at|date:"Y-m-d H:i" }}</td>
+                    <td>{{ x.old_owner|default:"-" }}</td>
+                    <td>{{ x.new_owner|default:"-" }}</td>
+                    <td>{{ x.changed_by|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-muted">No assignment changes</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
 {% endblock %}

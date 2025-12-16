@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
-from .froms import PartForm, StockMovementForm
+from .forms import PartForm, StockMovementForm
 from .models import Part, PartStockMovement, AuditLog
 from .querysets import parts_with_balance_qs
 from .permissions import GroupRequiredMixin, is_it, is_manager

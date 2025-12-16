@@ -5,6 +5,6 @@ class CoreConfig(AppConfig):
     name = "core"
 
     def ready(self):
+        from . import signals_asset  # noqa
         from . import signals_notifications  # noqa
         from . import signals_stock  # noqa
-
